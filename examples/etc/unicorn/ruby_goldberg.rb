@@ -1,9 +1,10 @@
-rails_env = ENV['RAILS_ENV'] || 'production'
 worker_processes 1
 preload_app true
 timeout 60
 APP_ROOT = '/opt/ruby-goldberg/app/'
-listen "#{APP_ROOT}/tmp/sockets/unicorn.sock"
+listen File.expand_path('tmp/sockets/unicorn.sock', APP_ROOT)
+pid File.expand_path('tmp/pids/unicorn.pid', APP_ROOT)
+working_directory APP_ROOT
 
 stderr_path "/var/log/unicorn/ruby_goldberg.stderr.log"
 stdout_path "/var/log/unicorn/ruby_goldberg.stdout.log"
@@ -11,7 +12,7 @@ stdout_path "/var/log/unicorn/ruby_goldberg.stdout.log"
 GC.copy_on_write_friendly = true if GC.respond_to?(:copy_on_write_friendly=)
 
 before_fork do |server, worker|
-  old_pid = APP_ROOT + '/tmp/pids/unicorn.pid.oldbin'
+  old_pid = File.expand_path('tmp/pids/unicorn.pid.oldbin', APP_ROOT)
   if File.exists?(old_pid) && server.pid != old_pid
     begin
       Process.kill("QUIT", File.read(old_pid).to_i)
